@@ -1,0 +1,11 @@
+Image Reconstruction Results
+==================================================
+Date: 2025-10-12 14:54:47
+Method: simple
+
+glare1_pixels: 167842
+glare2_pixels: 181771
+overlap_pixels: 46220
+overlap_percentage: 27.54
+recoverable_percentage: 72.46
+method_used: simple

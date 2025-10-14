@@ -1,0 +1,16 @@
+{
+    "hsv_lower": [
+        0,
+        0,
+        236
+    ],
+    "hsv_upper": [
+        180,
+        30,
+        255
+    ],
+    "min_area": 50,
+    "edge_expansion": 10,
+    "gradient_threshold": 30,
+    "feather_radius": 15
+}

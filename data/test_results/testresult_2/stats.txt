@@ -1,0 +1,17 @@
+Image Reconstruction Test Results
+==================================================
+
+Test Date: 2025-10-12 14:08:15
+Blend Method: blended
+
+Glare Statistics:
+--------------------------------------------------
+Image 1 glare pixels:     273,424
+Image 2 glare pixels:     259,829
+Overlapping glare pixels: 8,712
+
+Recovery Statistics:
+--------------------------------------------------
+Overlap percentage:    3.19%
+Recoverable glare:     96.81%
+

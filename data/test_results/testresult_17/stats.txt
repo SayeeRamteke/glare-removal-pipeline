@@ -1,0 +1,11 @@
+Image Reconstruction Results
+==================================================
+Date: 2025-10-12 19:59:59
+Method: blended
+
+glare1_pixels: 37010
+glare2_pixels: 45038
+overlap_pixels: 0
+overlap_percentage: 0.0
+recoverable_percentage: 100.0
+method_used: blended

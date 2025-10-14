@@ -1,0 +1,12 @@
+# Ignore the Python virtual environment folder
+venv/
+
+# Ignore Python's compiled files cache
+__pycache__/
+*.pyc
+
+# Ignore the entire outputs folder to avoid uploading large generated images
+data/outputs/
+
+# Ignore system-specific files (optional but good practice)
+.DS_Store
