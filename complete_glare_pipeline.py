@@ -498,6 +498,7 @@ def main():
         print("  --basic         Use basic detection")
         print("  --method METHOD Alignment: auto/orb/sift/ecc")
         print("  --resize WxH    Resize (e.g., 1920x1080)")
+        print("  --blend METHOD  Reconstruction: simple/blended/hybrid") 
         sys.exit(1)
     
     img1_filename = sys.argv[1]
@@ -518,7 +519,14 @@ def main():
         if idx + 1 < len(sys.argv):
             resize = sys.argv[idx + 1]
     
-    pipeline = CompleteGlarePipeline()
+    # ADD THIS BLOCK
+    blend_method = 'blended'  # default
+    if '--blend' in sys.argv:
+        idx = sys.argv.index('--blend')
+        if idx + 1 < len(sys.argv):
+            blend_method = sys.argv[idx + 1]
+    
+    pipeline = CompleteGlarePipeline(blend_method=blend_method)
     
     if use_basic:
         pipeline.use_enhanced_detection = False
