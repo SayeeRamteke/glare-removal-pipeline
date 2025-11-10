@@ -57,6 +57,8 @@ class ReconstructionModule:
         # Perform reconstruction based on selected method
         if self.blend_method == 'simple':
             result = self._reconstruct_simple(img1, img2_aligned, mask1, mask2, overlap_mask)
+        elif self.blend_method == 'hybrid':  # NEW!
+            result = self._reconstruct_hybrid(img1, img2_aligned, mask1, mask2, overlap_mask)
         else:  # blended
             result = self._reconstruct_blended(img1, img2_aligned, mask1, mask2, overlap_mask)
         
@@ -247,6 +249,69 @@ class ReconstructionModule:
             result[boundary > 0] = blurred[boundary > 0]
         
         return result
+    def _reconstruct_hybrid(self, img1, img2_aligned, mask1, mask2, overlap_mask):
+        """
+        Hybrid approach: Use img2 for content, then inpaint boundaries
+        """
+        # Step 1: Basic reconstruction from img2
+        result = img1.copy()
+        glare1 = mask1 > 0
+        glare2 = mask2 > 0
+        overlap = overlap_mask > 0
+    
+        # Use img2 where img1 has glare
+        use_img2 = glare1 & ~glare2
+        result[use_img2] = img2_aligned[use_img2]
+    
+        # Step 2: Color harmonization (match img2 to img1's color tone)
+        result = self._harmonize_colors(result, img1, mask1)
+    
+        # Step 3: Inpaint the boundaries for seamless transition
+        boundary_mask = self._create_boundary_mask(mask1, width=15)
+        result = cv2.inpaint(result, boundary_mask, 3, cv2.INPAINT_TELEA)
+    
+        # Step 4: Handle overlap regions
+        if np.any(overlap):
+        # For overlap, inpaint using surrounding context
+            result = cv2.inpaint(result, overlap.astype(np.uint8) * 255, 
+                            5, cv2.INPAINT_NS)
+    
+        return result
+
+    def _harmonize_colors(self, result, reference, mask):
+        """Match color statistics between reconstructed and original regions"""
+        # Convert to LAB color space for better color matching
+        result_lab = cv2.cvtColor(result, cv2.COLOR_BGR2LAB)
+        ref_lab = cv2.cvtColor(reference, cv2.COLOR_BGR2LAB)
+    
+        # Create a border region around glare for sampling
+        kernel = np.ones((15, 15), np.uint8)
+        border_region = cv2.dilate(mask, kernel) - mask
+    
+        if np.sum(border_region) > 0:
+        # Match mean and std of L, A, B channels
+            for i in range(3):
+                src_mean = result_lab[:,:,i][border_region > 0].mean()
+                src_std = result_lab[:,:,i][border_region > 0].std()
+                dst_mean = ref_lab[:,:,i][border_region > 0].mean()
+                dst_std = ref_lab[:,:,i][border_region > 0].std()
+            
+            # Apply color transfer in glare region
+            glare_region = mask > 0
+            result_lab[:,:,i][glare_region] = (
+                (result_lab[:,:,i][glare_region] - src_mean) * 
+                (dst_std / src_std) + dst_mean
+            )
+    
+        return cv2.cvtColor(result_lab, cv2.COLOR_LAB2BGR)
+
+    def _create_boundary_mask(self, mask, width=15):
+        """Create a mask of the boundary region"""
+        kernel = np.ones((width, width), np.uint8)
+        dilated = cv2.dilate(mask, kernel)
+        eroded = cv2.erode(mask, kernel)
+        boundary = dilated - eroded
+        return boundary.astype(np.uint8)
     
     def _compute_statistics(self, mask1: np.ndarray, mask2: np.ndarray,
                            overlap_mask: np.ndarray) -> Dict:
